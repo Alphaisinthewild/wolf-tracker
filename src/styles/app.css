@@ -17,7 +17,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -89,6 +90,8 @@ nav {
 
 .main-content {
   padding: 2rem;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -262,6 +265,57 @@ textarea {
   justify-content: flex-end;
 }
 
+.segmented-control {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.segment {
+  border: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.segment.active {
+  background: #1e293b;
+  color: #22c55e;
+}
+
+.compact-stats {
+  margin-bottom: 1rem;
+}
+
+.compact-stat strong {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.stack-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.section-title {
+  margin: 0.45rem 0 0.5rem;
+}
+
+.muted-copy {
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
 .chart-panel {
   min-height: 320px;
 }
@@ -274,10 +328,46 @@ textarea {
   .sidebar {
     border-right: 0;
     border-bottom: 1px solid #1e293b;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .segment {
+    min-height: 44px;
   }
 
   .form-grid,
   .two-col-grid {
     grid-template-columns: 1fr;
+  }
+
+  .button-row,
+  .left-on-mobile {
+    justify-content: stretch;
+  }
+
+  .button-row > button,
+  .left-on-mobile > button {
+    width: 100%;
+  }
+
+  .chart-panel {
+    min-height: 280px;
+    overflow: hidden;
   }
 }

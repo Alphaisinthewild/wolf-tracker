@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { getAllEntries, getEntry, getProfile, saveEntry, saveProfile } from '../lib/db'
+import { clearEntries, getAllEntries, getEntry, getProfile, saveEntry, saveProfile } from '../lib/db'
 import { getTodayKey, getLastNDays } from '../lib/dates'
 import { buildSeedEntries } from '../lib/seedData'
 
@@ -101,13 +101,31 @@ const useTrackerStore = create((set, get) => ({
 
   clearAllData: async () => {
     const seedEntries = buildSeedEntries()
+    set({ status: 'Saving...' })
+    await clearEntries()
     await Promise.all(seedEntries.map(saveEntry))
+    await saveProfile(defaultProfile)
     set({
       profile: defaultProfile,
       entries: Object.fromEntries(seedEntries.map(entry => [entry.date, entry])),
       status: 'Saved locally',
     })
-    await saveProfile(defaultProfile)
+  },
+
+  importBackup: async (payload) => {
+    const nextProfile = payload?.profile || defaultProfile
+    const nextEntries = Array.isArray(payload?.entries) ? payload.entries : []
+
+    set({ status: 'Saving...' })
+    await clearEntries()
+    await Promise.all(nextEntries.map(saveEntry))
+    await saveProfile(nextProfile)
+
+    set({
+      profile: nextProfile,
+      entries: Object.fromEntries(nextEntries.map(entry => [entry.date, entry])),
+      status: 'Saved locally',
+    })
   },
 
   getProgressStats: () => {

@@ -42,3 +42,8 @@ export async function getAllEntries() {
   const db = await getDb()
   return db.getAll('entries')
 }
+
+export async function clearEntries() {
+  const db = await getDb()
+  return db.clear('entries')
+}
