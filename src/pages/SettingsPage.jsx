@@ -12,12 +12,16 @@ export default function SettingsPage() {
   const [form, setForm] = useState(profile)
   const [importPreview, setImportPreview] = useState(null)
   const [importError, setImportError] = useState('')
-  const [notificationState, setNotificationState] = useState(getNotificationPermission())
+  const [notificationState, setNotificationState] = useState('checking')
   const fileInputRef = useRef(null)
 
   useEffect(() => {
     setForm(profile)
   }, [profile])
+
+  useEffect(() => {
+    getNotificationPermission().then(setNotificationState)
+  }, [])
 
   const updateField = (event) => {
     const { name, value, type, checked } = event.target
