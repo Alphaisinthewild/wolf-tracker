@@ -18,6 +18,7 @@ Local-first health and fitness tracker built with React, Vite, Zustand, IndexedD
 - Weekly summary and plateau detection
 - Lightweight installable offline app support
 - Validated backup import with safer restore feedback
+- Capacitor iOS wrapper for turning the app into an iPhone app
 - Local persistence in IndexedDB
 
 ## Scripts
