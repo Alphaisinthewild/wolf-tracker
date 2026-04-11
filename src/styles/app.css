@@ -373,6 +373,10 @@ select {
   gap: 0.75rem;
 }
 
+.top-gap {
+  margin-top: 1rem;
+}
+
 .history-card {
   padding: 0.9rem 1rem;
   border: 1px solid #1e293b;
@@ -388,6 +392,16 @@ select {
 .history-card p {
   margin: 0;
   color: #94a3b8;
+}
+
+.danger-card {
+  border-color: #7f1d1d;
+  background: #1f0a0a;
+}
+
+.danger-card strong,
+.danger-card p {
+  color: #fca5a5;
 }
 
 .section-title {

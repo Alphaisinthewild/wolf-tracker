@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import useTrackerStore from '../store/useTrackerStore'
 import { downloadBackup, readBackupFile } from '../lib/backup'
+import { summarizeBackup } from '../lib/importGuard'
+import { getNotificationPermission, requestNotificationPermission } from '../lib/notifications'
 
 export default function SettingsPage() {
   const profile = useTrackerStore(s => s.profile)
@@ -8,6 +10,9 @@ export default function SettingsPage() {
   const saveProfile = useTrackerStore(s => s.saveProfile)
   const importBackup = useTrackerStore(s => s.importBackup)
   const [form, setForm] = useState(profile)
+  const [importPreview, setImportPreview] = useState(null)
+  const [importError, setImportError] = useState('')
+  const [notificationState, setNotificationState] = useState(getNotificationPermission())
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -43,9 +48,22 @@ export default function SettingsPage() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    const payload = await readBackupFile(file)
-    await importBackup(payload)
+    try {
+      setImportError('')
+      const payload = await readBackupFile(file)
+      setImportPreview(summarizeBackup(payload))
+      await importBackup(payload)
+    } catch (error) {
+      setImportError(error.message || 'Import failed.')
+      setImportPreview(null)
+    }
+
     event.target.value = ''
+  }
+
+  const handleEnableNotifications = async () => {
+    const result = await requestNotificationPermission()
+    setNotificationState(result)
   }
 
   return (
@@ -85,13 +103,32 @@ export default function SettingsPage() {
         </form>
 
         <div className="panel">
-          <span className="eyebrow">Backup</span>
+          <span className="eyebrow">Reminders and backup</span>
           <h3 className="section-title">Protect local data</h3>
-          <p className="muted-copy">Export a JSON backup anytime, then import it later on this device or another one.</p>
+          <p className="muted-copy">Export a JSON backup anytime, restore with validation, and enable browser notifications for check-ins.</p>
           <div className="stack-actions">
             <button type="button" className="secondary-button" onClick={handleExport}>Export backup</button>
             <button type="button" className="secondary-button" onClick={handleImportClick}>Import backup</button>
+            <button type="button" className="secondary-button" onClick={handleEnableNotifications}>Enable notifications</button>
             <input ref={fileInputRef} type="file" accept="application/json" className="hidden-input" onChange={handleImportChange} />
+          </div>
+          <div className="history-list top-gap">
+            <div className="history-card">
+              <strong>Notification status</strong>
+              <p>{notificationState}</p>
+            </div>
+            {importPreview ? (
+              <div className="history-card">
+                <strong>Last import</strong>
+                <p>{importPreview.entryCount} entries · exported {importPreview.exportedAt} · photos: {importPreview.hasPhotos ? 'yes' : 'no'}</p>
+              </div>
+            ) : null}
+            {importError ? (
+              <div className="history-card danger-card">
+                <strong>Import error</strong>
+                <p>{importError}</p>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

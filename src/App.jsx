@@ -7,6 +7,7 @@ import DailyLogPage from './pages/DailyLogPage'
 import SettingsPage from './pages/SettingsPage'
 import SetupPage from './pages/SetupPage'
 import useTrackerStore from './store/useTrackerStore'
+import { scheduleDailyReminder } from './lib/notifications'
 import './styles/app.css'
 
 const ProgressPage = lazy(() => import('./pages/ProgressPage'))
@@ -16,10 +17,16 @@ export default function App() {
   const initialize = useTrackerStore(s => s.initialize)
   const initialized = useTrackerStore(s => s.initialized)
   const hasCompletedSetup = useTrackerStore(s => s.hasCompletedSetup)
+  const profile = useTrackerStore(s => s.profile)
 
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  useEffect(() => {
+    if (!initialized || !hasCompletedSetup) return undefined
+    return scheduleDailyReminder(profile)
+  }, [initialized, hasCompletedSetup, profile])
 
   if (!initialized) {
     return <div className="loading-screen">Loading Wolf Tracker...</div>
