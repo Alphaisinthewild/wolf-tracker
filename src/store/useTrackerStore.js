@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { getAllEntries, getEntry, getProfile, saveEntry, saveProfile } from '../lib/db'
 import { getTodayKey, getLastNDays } from '../lib/dates'
+import { buildSeedEntries } from '../lib/seedData'
 
 const defaultProfile = {
   startingWeight: 335,
@@ -38,7 +39,17 @@ const useTrackerStore = create((set, get) => ({
       getAllEntries(),
     ])
 
-    const entries = Object.fromEntries(allEntries.map(entry => [entry.date, entry]))
+    let entries = Object.fromEntries(allEntries.map(entry => [entry.date, entry]))
+
+    if (allEntries.length === 0) {
+      const seedEntries = buildSeedEntries()
+      await Promise.all(seedEntries.map(saveEntry))
+      entries = Object.fromEntries(seedEntries.map(entry => [entry.date, entry]))
+    }
+
+    if (!storedProfile) {
+      await saveProfile(defaultProfile)
+    }
 
     set({
       profile: storedProfile || defaultProfile,
@@ -86,6 +97,17 @@ const useTrackerStore = create((set, get) => ({
   getTodayEntry: () => {
     const today = getTodayKey()
     return get().entries[today] || emptyEntry(today)
+  },
+
+  clearAllData: async () => {
+    const seedEntries = buildSeedEntries()
+    await Promise.all(seedEntries.map(saveEntry))
+    set({
+      profile: defaultProfile,
+      entries: Object.fromEntries(seedEntries.map(entry => [entry.date, entry])),
+      status: 'Saved locally',
+    })
+    await saveProfile(defaultProfile)
   },
 
   getProgressStats: () => {

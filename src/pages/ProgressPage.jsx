@@ -16,7 +16,7 @@ export default function ProgressPage() {
       <div className="card-grid">
         <div className="panel stat-card"><span className="eyebrow">Current</span><strong>{progress.currentWeight} lbs</strong></div>
         <div className="panel stat-card"><span className="eyebrow">Lost</span><strong>{progress.weightLost.toFixed(1)} lbs</strong></div>
-        <div className="panel stat-card"><span className="eyebrow">Remaining</span><strong>{progress.remaining.toFixed(1)} lbs</strong></div>
+        <div className="panel stat-card"><span className="eyebrow">Remaining</span><strong>{Math.max(0, progress.remaining).toFixed(1)} lbs</strong></div>
         <div className="panel stat-card"><span className="eyebrow">Progress</span><strong>{progress.progressPercent}%</strong></div>
       </div>
     </section>

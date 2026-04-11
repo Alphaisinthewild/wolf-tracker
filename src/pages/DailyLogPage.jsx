@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import useTrackerStore from '../store/useTrackerStore'
-import { getTodayKey } from '../lib/dates'
+import { formatDate, getTodayKey } from '../lib/dates'
 
 const baseForm = {
   date: getTodayKey(),
@@ -18,11 +18,13 @@ const baseForm = {
 export default function DailyLogPage() {
   const loadEntry = useTrackerStore(s => s.loadEntry)
   const saveDailyEntry = useTrackerStore(s => s.saveDailyEntry)
+  const clearAllData = useTrackerStore(s => s.clearAllData)
+  const [selectedDate, setSelectedDate] = useState(baseForm.date)
   const [form, setForm] = useState(baseForm)
 
   useEffect(() => {
-    loadEntry(form.date).then(entry => setForm(entry))
-  }, [form.date, loadEntry])
+    loadEntry(selectedDate).then(entry => setForm(entry))
+  }, [selectedDate, loadEntry])
 
   const updateField = (event) => {
     const { name, value, type, checked } = event.target
@@ -37,20 +39,33 @@ export default function DailyLogPage() {
     await saveDailyEntry(form)
   }
 
+  const handleResetDemo = async () => {
+    await clearAllData()
+    const next = await loadEntry(getTodayKey())
+    setSelectedDate(getTodayKey())
+    setForm(next)
+  }
+
   return (
     <section>
       <div className="page-header">
         <div>
           <h2>Daily Log</h2>
-          <p>One clean entry per day.</p>
+          <p>{formatDate(selectedDate)}</p>
         </div>
+        <button type="button" className="secondary-button" onClick={handleResetDemo}>Reset demo data</button>
       </div>
 
       <form className="panel form-panel" onSubmit={onSubmit}>
         <div className="form-grid">
           <label>
             <span>Date</span>
-            <input type="date" name="date" value={form.date} onChange={updateField} />
+            <input
+              type="date"
+              name="date"
+              value={selectedDate}
+              onChange={(event) => setSelectedDate(event.target.value)}
+            />
           </label>
           <label>
             <span>Weight</span>
@@ -74,7 +89,7 @@ export default function DailyLogPage() {
           </label>
           <label>
             <span>Workout type</span>
-            <input type="text" name="workoutType" value={form.workoutType} onChange={updateField} />
+            <input type="text" name="workoutType" value={form.workoutType} onChange={updateField} placeholder="Strength, walk, cardio..." />
           </label>
           <label className="full-width">
             <span>Workout notes</span>
@@ -89,7 +104,9 @@ export default function DailyLogPage() {
             <textarea name="notes" rows="4" value={form.notes} onChange={updateField} />
           </label>
         </div>
-        <button type="submit" className="primary-button">Save entry</button>
+        <div className="button-row">
+          <button type="submit" className="primary-button">Save entry</button>
+        </div>
       </form>
     </section>
   )
