@@ -12,6 +12,8 @@ Local-first health and fitness tracker built with React, Vite, Zustand, IndexedD
 - 7-day and 30-day trends
 - Goal settings
 - Local JSON export/import backup
+- CSV export for logged history
+- Streaks, milestones, and adherence scoring
 - Local persistence in IndexedDB
 
 ## Scripts

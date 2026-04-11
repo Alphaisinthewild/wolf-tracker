@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import useTrackerStore from '../store/useTrackerStore'
+import { exportEntriesToCsv } from '../lib/exporters'
 
 function MeasurementRow({ label, value, unit }) {
   return (
@@ -16,6 +17,8 @@ export default function ProgressPage() {
   const progress = useTrackerStore(s => s.getProgressStats())
   const latestMeasurements = useTrackerStore(s => s.getLatestMeasurements())
   const latestPhotos = useTrackerStore(s => s.getLatestPhotos())
+
+  const allEntries = useMemo(() => Object.values(entries).sort((a, b) => a.date.localeCompare(b.date)), [entries])
 
   const measurementUnit = profile.unitSystem === 'metric' ? 'cm' : 'in'
   const weightUnit = profile.unitSystem === 'metric' ? 'kg' : 'lbs'
@@ -37,6 +40,7 @@ export default function ProgressPage() {
           <h2>Progress</h2>
           <p>{profile.startingWeight} {weightUnit} to {profile.targetWeight} {weightUnit}</p>
         </div>
+        <button type="button" className="secondary-button" onClick={() => exportEntriesToCsv(allEntries)}>Export CSV</button>
       </div>
 
       <div className="card-grid">
@@ -44,6 +48,8 @@ export default function ProgressPage() {
         <div className="panel stat-card"><span className="eyebrow">Lost</span><strong>{progress.weightLost.toFixed(1)} {weightUnit}</strong></div>
         <div className="panel stat-card"><span className="eyebrow">Remaining</span><strong>{Math.max(0, progress.remaining).toFixed(1)} {weightUnit}</strong></div>
         <div className="panel stat-card"><span className="eyebrow">Progress</span><strong>{progress.progressPercent}%</strong></div>
+        <div className="panel stat-card"><span className="eyebrow">Streak</span><strong>{progress.currentStreak} day{progress.currentStreak === 1 ? '' : 's'}</strong></div>
+        <div className="panel stat-card"><span className="eyebrow">Adherence</span><strong>{progress.adherenceScore}%</strong></div>
       </div>
 
       <div className="two-col-grid">
@@ -75,6 +81,21 @@ export default function ProgressPage() {
       </div>
 
       <div className="two-col-grid">
+        <div className="panel">
+          <span className="eyebrow">Milestones</span>
+          {progress.milestones.length > 0 ? (
+            <div className="history-list">
+              {progress.milestones.map(milestone => (
+                <div key={milestone} className="history-card">
+                  <strong>{milestone}</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted-copy">No milestone reached yet. Keep stacking days.</p>
+          )}
+        </div>
+
         <div className="panel">
           <span className="eyebrow">Measurement history</span>
           {measurementHistory.length > 0 ? (

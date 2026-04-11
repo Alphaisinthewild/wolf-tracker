@@ -194,7 +194,11 @@ const useTrackerStore = create((set, get) => ({
 
   getProgressStats: () => {
     const { profile, entries } = get()
-    const allWeights = Object.values(entries)
+    const chronologicalEntries = Object.values(entries)
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    const allWeights = chronologicalEntries
       .map(entry => Number(entry.weight))
       .filter(weight => !Number.isNaN(weight) && weight > 0)
 
@@ -203,11 +207,33 @@ const useTrackerStore = create((set, get) => ({
     const totalToLose = profile.startingWeight - profile.targetWeight
     const progressPercent = totalToLose > 0 ? Math.max(0, Math.round((weightLost / totalToLose) * 1000) / 10) : 0
 
+    const adherenceDays = chronologicalEntries.filter(entry => (
+      Number(entry.calories) > 0 ||
+      Number(entry.protein) > 0 ||
+      Number(entry.steps) > 0 ||
+      entry.workoutCompleted
+    ))
+
+    let currentStreak = 0
+    for (let i = chronologicalEntries.length - 1; i >= 0; i -= 1) {
+      const entry = chronologicalEntries[i]
+      const hasActivity = Number(entry.calories) > 0 || Number(entry.protein) > 0 || Number(entry.steps) > 0 || entry.workoutCompleted
+      if (!hasActivity) break
+      currentStreak += 1
+    }
+
+    const milestones = [10, 25, 50, 75, 100]
+      .filter(mark => progressPercent >= mark)
+      .map(mark => `${mark}% goal progress`)
+
     return {
       currentWeight,
       weightLost,
       remaining: currentWeight - profile.targetWeight,
       progressPercent,
+      adherenceScore: chronologicalEntries.length > 0 ? Math.round((adherenceDays.length / chronologicalEntries.length) * 100) : 0,
+      currentStreak,
+      milestones,
     }
   },
 
