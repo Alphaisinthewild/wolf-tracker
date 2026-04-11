@@ -9,6 +9,7 @@ const defaultProfile = {
   calorieGoal: 2250,
   proteinGoal: 185,
   stepGoal: 10000,
+  setupComplete: false,
 }
 
 const emptyEntry = (date) => ({
@@ -22,6 +23,13 @@ const emptyEntry = (date) => ({
   workoutNotes: '',
   supplements: '',
   notes: '',
+  measurements: {
+    waist: '',
+    chest: '',
+    arms: '',
+    thighs: '',
+  },
+  photos: [],
   updatedAt: new Date().toISOString(),
 })
 
@@ -30,6 +38,7 @@ const useTrackerStore = create((set, get) => ({
   entries: {},
   status: 'Ready',
   initialized: false,
+  hasCompletedSetup: false,
 
   initialize: async () => {
     set({ status: 'Loading...' })
@@ -51,18 +60,36 @@ const useTrackerStore = create((set, get) => ({
       await saveProfile(defaultProfile)
     }
 
+    const resolvedProfile = storedProfile || defaultProfile
+
     set({
-      profile: storedProfile || defaultProfile,
+      profile: resolvedProfile,
       entries,
       status: 'Saved locally',
       initialized: true,
+      hasCompletedSetup: Boolean(resolvedProfile.setupComplete),
     })
   },
 
   saveProfile: async (profile) => {
     set({ status: 'Saving...' })
     await saveProfile(profile)
-    set({ profile, status: 'Saved locally' })
+    set({
+      profile,
+      status: 'Saved locally',
+      hasCompletedSetup: Boolean(profile.setupComplete),
+    })
+  },
+
+  completeSetup: async (profile) => {
+    const nextProfile = { ...profile, setupComplete: true }
+    set({ status: 'Saving...' })
+    await saveProfile(nextProfile)
+    set({
+      profile: nextProfile,
+      status: 'Saved locally',
+      hasCompletedSetup: true,
+    })
   },
 
   loadEntry: async (date) => {
@@ -114,7 +141,17 @@ const useTrackerStore = create((set, get) => ({
 
   importBackup: async (payload) => {
     const nextProfile = payload?.profile || defaultProfile
-    const nextEntries = Array.isArray(payload?.entries) ? payload.entries : []
+    const nextEntries = Array.isArray(payload?.entries)
+      ? payload.entries.map(entry => ({
+          ...emptyEntry(entry.date),
+          ...entry,
+          measurements: {
+            ...emptyEntry(entry.date).measurements,
+            ...(entry.measurements || {}),
+          },
+          photos: Array.isArray(entry.photos) ? entry.photos : [],
+        }))
+      : []
 
     set({ status: 'Saving...' })
     await clearEntries()
@@ -126,6 +163,26 @@ const useTrackerStore = create((set, get) => ({
       entries: Object.fromEntries(nextEntries.map(entry => [entry.date, entry])),
       status: 'Saved locally',
     })
+  },
+
+  getLatestMeasurements: () => {
+    const entries = Object.values(get().entries)
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .reverse()
+
+    const latest = entries.find(entry => Object.values(entry.measurements || {}).some(Boolean))
+    return latest?.measurements || emptyEntry(getTodayKey()).measurements
+  },
+
+  getLatestPhotos: () => {
+    const entries = Object.values(get().entries)
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .reverse()
+
+    const latest = entries.find(entry => Array.isArray(entry.photos) && entry.photos.length > 0)
+    return latest?.photos || []
   },
 
   getProgressStats: () => {

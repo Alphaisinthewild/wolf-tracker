@@ -65,6 +65,14 @@ export default function SettingsPage() {
             <label><span>Calorie goal</span><input type="number" name="calorieGoal" value={form.calorieGoal} onChange={updateField} /></label>
             <label><span>Protein goal</span><input type="number" name="proteinGoal" value={form.proteinGoal} onChange={updateField} /></label>
             <label><span>Step goal</span><input type="number" name="stepGoal" value={form.stepGoal} onChange={updateField} /></label>
+            <label className="checkbox-row full-width">
+              <input
+                type="checkbox"
+                checked={Boolean(form.setupComplete)}
+                onChange={(event) => setForm(current => ({ ...current, setupComplete: event.target.checked }))}
+              />
+              <span>Setup completed</span>
+            </label>
           </div>
           <div className="button-row left-on-mobile">
             <button type="submit" className="primary-button">Save goals</button>

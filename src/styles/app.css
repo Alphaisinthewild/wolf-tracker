@@ -102,6 +102,12 @@ nav {
   margin-bottom: 1.5rem;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .page-header h2 {
   margin: 0 0 0.35rem;
   font-size: 2rem;
@@ -142,6 +148,11 @@ nav {
   border-radius: 1rem;
   padding: 1.25rem;
   margin-bottom: 1rem;
+}
+
+.inset-panel {
+  background: #020617;
+  margin-bottom: 0;
 }
 
 .card-grid {
@@ -305,6 +316,51 @@ textarea {
 
 .hidden-input {
   display: none;
+}
+
+.measurements-grid.compact-grid {
+  margin-bottom: 0;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.form-photo-grid {
+  margin-bottom: 1rem;
+}
+
+.photo-card {
+  margin: 0;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.photo-card figcaption {
+  padding: 0.75rem;
+  color: #cbd5e1;
+}
+
+.setup-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.setup-card {
+  width: min(760px, 100%);
 }
 
 .section-title {
