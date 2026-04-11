@@ -14,6 +14,9 @@ Local-first health and fitness tracker built with React, Vite, Zustand, IndexedD
 - Local JSON export/import backup
 - CSV export for logged history
 - Streaks, milestones, and adherence scoring
+- Reminder settings and check-in prompt UX
+- Weekly summary and plateau detection
+- Lightweight installable offline app support
 - Local persistence in IndexedDB
 
 ## Scripts

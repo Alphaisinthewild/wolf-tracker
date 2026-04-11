@@ -3,6 +3,7 @@ import { clearEntries, getAllEntries, getEntry, getProfile, saveEntry, saveProfi
 import { getTodayKey, getLastNDays } from '../lib/dates'
 import { buildSeedEntries } from '../lib/seedData'
 import { getRecommendedGoals } from '../lib/onboarding'
+import { detectPlateau, getWeeklySummary } from '../lib/analytics'
 
 const defaultProfile = {
   startingWeight: 335,
@@ -11,6 +12,8 @@ const defaultProfile = {
   proteinGoal: 185,
   stepGoal: 10000,
   unitSystem: 'imperial',
+  remindersEnabled: true,
+  reminderTime: '20:00',
   setupComplete: false,
 }
 
@@ -250,6 +253,17 @@ const useTrackerStore = create((set, get) => ({
         workouts: entry.workoutCompleted ? 1 : 0,
       }
     })
+  },
+
+  getInsights: () => {
+    const entries = Object.values(get().entries)
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    return {
+      weeklySummary: getWeeklySummary(entries),
+      plateau: detectPlateau(entries),
+    }
   },
 }))
 

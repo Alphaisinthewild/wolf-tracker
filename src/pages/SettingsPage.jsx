@@ -15,10 +15,10 @@ export default function SettingsPage() {
   }, [profile])
 
   const updateField = (event) => {
-    const { name, value } = event.target
+    const { name, value, type, checked } = event.target
     setForm(current => ({
       ...current,
-      [name]: Number(value),
+      [name]: type === 'checkbox' ? checked : ['reminderTime'].includes(name) ? value : Number(value),
     }))
   }
 
@@ -65,6 +65,11 @@ export default function SettingsPage() {
             <label><span>Calorie goal</span><input type="number" name="calorieGoal" value={form.calorieGoal} onChange={updateField} /></label>
             <label><span>Protein goal</span><input type="number" name="proteinGoal" value={form.proteinGoal} onChange={updateField} /></label>
             <label><span>Step goal</span><input type="number" name="stepGoal" value={form.stepGoal} onChange={updateField} /></label>
+            <label className="checkbox-row full-width">
+              <input type="checkbox" name="remindersEnabled" checked={Boolean(form.remindersEnabled)} onChange={updateField} />
+              <span>Enable daily reminder</span>
+            </label>
+            <label><span>Reminder time</span><input type="time" name="reminderTime" value={form.reminderTime || '20:00'} onChange={updateField} /></label>
             <label className="checkbox-row full-width">
               <input
                 type="checkbox"

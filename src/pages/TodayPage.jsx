@@ -23,6 +23,7 @@ function GoalCard({ label, value, suffix = '', goal, tone = 'green' }) {
 export default function TodayPage() {
   const profile = useTrackerStore(s => s.profile)
   const getTodayEntry = useTrackerStore(s => s.getTodayEntry)
+  const insights = useTrackerStore(s => s.getInsights())
 
   const today = getTodayKey()
   const entry = getTodayEntry()
@@ -62,6 +63,24 @@ export default function TodayPage() {
           <span className="eyebrow">Workout status</span>
           <strong>{entry.workoutCompleted ? entry.workoutType || 'Completed' : 'Not logged yet'}</strong>
           <p>{entry.workoutNotes || 'No workout notes entered yet.'}</p>
+        </div>
+      </div>
+
+      <div className="two-col-grid">
+        <div className="panel">
+          <span className="eyebrow">Weekly summary</span>
+          <ul className="summary-list">
+            <li><span>Avg calories</span><strong>{insights.weeklySummary.avgCalories}</strong></li>
+            <li><span>Avg protein</span><strong>{insights.weeklySummary.avgProtein}g</strong></li>
+            <li><span>Avg steps</span><strong>{insights.weeklySummary.avgSteps}</strong></li>
+            <li><span>Workouts</span><strong>{insights.weeklySummary.workouts}</strong></li>
+          </ul>
+        </div>
+
+        <div className="panel">
+          <span className="eyebrow">Prompt</span>
+          <strong>{profile.remindersEnabled ? `Check in by ${profile.reminderTime}` : 'Reminders off'}</strong>
+          <p>{insights.plateau.message}</p>
         </div>
       </div>
 
