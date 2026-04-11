@@ -3,11 +3,12 @@
 Local-first health and fitness tracker built with React, Vite, Zustand, IndexedDB, and Recharts.
 
 ## Current scope
-- First-run onboarding/setup flow
+- First-run onboarding/setup flow with unit selection and recommended defaults
 - Today dashboard
 - Daily log
-- Body measurements and progress photos
+- Body measurements and compressed progress photos
 - Progress summary
+- Measurement history and photo history
 - 7-day and 30-day trends
 - Goal settings
 - Local JSON export/import backup

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { clearEntries, getAllEntries, getEntry, getProfile, saveEntry, saveProfile } from '../lib/db'
 import { getTodayKey, getLastNDays } from '../lib/dates'
 import { buildSeedEntries } from '../lib/seedData'
+import { getRecommendedGoals } from '../lib/onboarding'
 
 const defaultProfile = {
   startingWeight: 335,
@@ -9,6 +10,7 @@ const defaultProfile = {
   calorieGoal: 2250,
   proteinGoal: 185,
   stepGoal: 10000,
+  unitSystem: 'imperial',
   setupComplete: false,
 }
 
@@ -82,7 +84,12 @@ const useTrackerStore = create((set, get) => ({
   },
 
   completeSetup: async (profile) => {
-    const nextProfile = { ...profile, setupComplete: true }
+    const recommended = getRecommendedGoals(profile.startingWeight, profile.unitSystem)
+    const nextProfile = {
+      ...recommended,
+      ...profile,
+      setupComplete: true,
+    }
     set({ status: 'Saving...' })
     await saveProfile(nextProfile)
     set({

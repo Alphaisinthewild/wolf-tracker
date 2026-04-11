@@ -207,7 +207,8 @@ label span {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid #334155;
   border-radius: 0.75rem;
@@ -361,6 +362,32 @@ textarea {
 
 .setup-card {
   width: min(760px, 100%);
+}
+
+.recommendation-panel {
+  margin-bottom: 1rem;
+}
+
+.history-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.history-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid #1e293b;
+  border-radius: 0.85rem;
+  background: #020617;
+}
+
+.history-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.history-card p {
+  margin: 0;
+  color: #94a3b8;
 }
 
 .section-title {
