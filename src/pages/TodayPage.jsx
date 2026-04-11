@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useTrackerStore from '../store/useTrackerStore'
 import { formatDate, getTodayKey } from '../lib/dates'
 import { getCompletion } from '../lib/metrics'
+import { copyText } from '../lib/copy'
+import { buildWeeklyNarrative } from '../lib/summary'
 
 function GoalCard({ label, value, suffix = '', goal, tone = 'green' }) {
   const completion = getCompletion(value, goal)
@@ -24,12 +27,19 @@ export default function TodayPage() {
   const profile = useTrackerStore(s => s.profile)
   const getTodayEntry = useTrackerStore(s => s.getTodayEntry)
   const insights = useTrackerStore(s => s.getInsights())
+  const [copied, setCopied] = useState(false)
 
   const today = getTodayKey()
   const entry = getTodayEntry()
   const caloriesRemaining = Math.max(0, profile.calorieGoal - Number(entry.calories || 0))
   const proteinRemaining = Math.max(0, profile.proteinGoal - Number(entry.protein || 0))
   const stepsRemaining = Math.max(0, profile.stepGoal - Number(entry.steps || 0))
+
+  const handleCopySummary = async () => {
+    await copyText(buildWeeklyNarrative(insights, profile))
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <section>
@@ -38,7 +48,10 @@ export default function TodayPage() {
           <h2>Today</h2>
           <p>{formatDate(today)}</p>
         </div>
-        <Link className="primary-button" to="/log">Log today</Link>
+        <div className="header-actions">
+          <button type="button" className="secondary-button" onClick={handleCopySummary}>{copied ? 'Copied' : 'Copy summary'}</button>
+          <Link className="primary-button" to="/log">Log today</Link>
+        </div>
       </div>
 
       <div className="card-grid">

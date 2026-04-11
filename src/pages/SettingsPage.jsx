@@ -109,7 +109,7 @@ export default function SettingsPage() {
         <div className="panel">
           <span className="eyebrow">Reminders and backup</span>
           <h3 className="section-title">Protect local data</h3>
-          <p className="muted-copy">Export a JSON backup anytime, restore with validation, and enable browser notifications for check-ins.</p>
+          <p className="muted-copy">Export a JSON backup anytime, restore with validation, and enable notifications for check-ins. On iPhone, native local notifications are used through Capacitor.</p>
           <div className="stack-actions">
             <button type="button" className="secondary-button" onClick={handleExport}>Export backup</button>
             <button type="button" className="secondary-button" onClick={handleImportClick}>Import backup</button>
@@ -126,7 +126,12 @@ export default function SettingsPage() {
                 <strong>Last import</strong>
                 <p>{importPreview.entryCount} entries · exported {importPreview.exportedAt} · photos: {importPreview.hasPhotos ? 'yes' : 'no'}</p>
               </div>
-            ) : null}
+            ) : (
+              <div className="history-card">
+                <strong>Backup tip</strong>
+                <p>Export before big changes or before testing on a new device.</p>
+              </div>
+            )}
             {importError ? (
               <div className="history-card danger-card">
                 <strong>Import error</strong>

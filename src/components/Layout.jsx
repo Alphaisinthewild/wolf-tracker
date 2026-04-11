@@ -13,7 +13,7 @@ export default function Layout() {
   const status = useTrackerStore(s => s.status)
 
   return (
-    <div className="app-shell">
+    <div className="app-shell ios-safe-shell">
       <aside className="sidebar">
         <div>
           <h1>WOLF TRACKER</h1>

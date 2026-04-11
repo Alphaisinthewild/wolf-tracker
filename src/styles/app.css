@@ -13,6 +13,7 @@ body {
   margin: 0;
   background: #020617;
   color: #e2e8f0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button,
@@ -20,6 +21,10 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button {
+  touch-action: manipulation;
 }
 
 .loading-screen {
@@ -35,6 +40,11 @@ select {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 280px 1fr;
+}
+
+.ios-safe-shell {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .sidebar {
@@ -423,14 +433,23 @@ select {
   }
 
   .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     border-right: 0;
     border-bottom: 1px solid #1e293b;
     padding: 1rem;
     gap: 1rem;
+    backdrop-filter: blur(14px);
+    background: rgba(15, 23, 42, 0.92);
   }
 
   nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-link {
+    text-align: center;
   }
 
   .main-content {
@@ -440,6 +459,11 @@ select {
   .page-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .primary-button,
