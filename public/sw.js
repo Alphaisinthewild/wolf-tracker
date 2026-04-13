@@ -1,5 +1,6 @@
 const CACHE_NAME = 'wolf-tracker-v1'
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg']
+const BASE = self.location.pathname.replace(/\/sw\.js$/, '')
+const APP_SHELL = [`${BASE}/`, `${BASE}/index.html`, `${BASE}/manifest.webmanifest`, `${BASE}/favicon.svg`]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)))
@@ -21,6 +22,6 @@ self.addEventListener('fetch', (event) => {
       const copy = response.clone()
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy))
       return response
-    }).catch(() => caches.match('/index.html')))
+    }).catch(() => caches.match(`${BASE}/index.html`)))
   )
 })

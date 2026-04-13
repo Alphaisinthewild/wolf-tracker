@@ -1,5 +1,5 @@
 import { lazy, useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LazyRoute from './components/LazyRoute'
 import TodayPage from './pages/TodayPage'
@@ -33,7 +33,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {!hasCompletedSetup ? (
           <>
@@ -51,6 +51,6 @@ export default function App() {
           </Route>
         )}
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
