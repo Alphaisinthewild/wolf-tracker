@@ -48,32 +48,42 @@ const useTrackerStore = create((set, get) => ({
   initialize: async () => {
     set({ status: 'Loading...' })
 
-    const [storedProfile, allEntries] = await Promise.all([
-      getProfile(),
-      getAllEntries(),
-    ])
+    try {
+      const [storedProfile, allEntries] = await Promise.all([
+        getProfile(),
+        getAllEntries(),
+      ])
 
-    let entries = Object.fromEntries(allEntries.map(entry => [entry.date, entry]))
+      let entries = Object.fromEntries(allEntries.map(entry => [entry.date, entry]))
 
-    if (allEntries.length === 0) {
-      const seedEntries = buildSeedEntries()
-      await Promise.all(seedEntries.map(saveEntry))
-      entries = Object.fromEntries(seedEntries.map(entry => [entry.date, entry]))
+      if (allEntries.length === 0) {
+        const seedEntries = buildSeedEntries()
+        await Promise.all(seedEntries.map(saveEntry))
+        entries = Object.fromEntries(seedEntries.map(entry => [entry.date, entry]))
+      }
+
+      if (!storedProfile) {
+        await saveProfile(defaultProfile)
+      }
+
+      const resolvedProfile = storedProfile || defaultProfile
+
+      set({
+        profile: resolvedProfile,
+        entries,
+        status: 'Saved locally',
+        initialized: true,
+        hasCompletedSetup: Boolean(resolvedProfile.setupComplete),
+      })
+    } catch {
+      set({
+        profile: defaultProfile,
+        entries: {},
+        status: 'Ready',
+        initialized: true,
+        hasCompletedSetup: false,
+      })
     }
-
-    if (!storedProfile) {
-      await saveProfile(defaultProfile)
-    }
-
-    const resolvedProfile = storedProfile || defaultProfile
-
-    set({
-      profile: resolvedProfile,
-      entries,
-      status: 'Saved locally',
-      initialized: true,
-      hasCompletedSetup: Boolean(resolvedProfile.setupComplete),
-    })
   },
 
   saveProfile: async (profile) => {
