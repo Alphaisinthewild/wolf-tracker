@@ -14,9 +14,13 @@ function MeasurementRow({ label, value, unit }) {
 export default function ProgressPage() {
   const profile = useTrackerStore(s => s.profile)
   const entries = useTrackerStore(s => s.entries)
-  const progress = useTrackerStore(s => s.getProgressStats())
-  const latestMeasurements = useTrackerStore(s => s.getLatestMeasurements())
-  const latestPhotos = useTrackerStore(s => s.getLatestPhotos())
+  const getProgressStats = useTrackerStore(s => s.getProgressStats)
+  const getLatestMeasurements = useTrackerStore(s => s.getLatestMeasurements)
+  const getLatestPhotos = useTrackerStore(s => s.getLatestPhotos)
+
+  const progress = useMemo(() => getProgressStats(), [entries, profile, getProgressStats])
+  const latestMeasurements = useMemo(() => getLatestMeasurements(), [entries, getLatestMeasurements])
+  const latestPhotos = useMemo(() => getLatestPhotos(), [entries, getLatestPhotos])
 
   const allEntries = useMemo(() => Object.values(entries).sort((a, b) => a.date.localeCompare(b.date)), [entries])
 

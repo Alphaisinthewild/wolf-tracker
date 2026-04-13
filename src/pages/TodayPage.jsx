@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useTrackerStore from '../store/useTrackerStore'
 import { formatDate, getTodayKey } from '../lib/dates'
@@ -25,12 +25,14 @@ function GoalCard({ label, value, suffix = '', goal, tone = 'green' }) {
 
 export default function TodayPage() {
   const profile = useTrackerStore(s => s.profile)
+  const entries = useTrackerStore(s => s.entries)
   const getTodayEntry = useTrackerStore(s => s.getTodayEntry)
-  const insights = useTrackerStore(s => s.getInsights())
+  const getInsights = useTrackerStore(s => s.getInsights)
   const [copied, setCopied] = useState(false)
 
   const today = getTodayKey()
-  const entry = getTodayEntry()
+  const entry = useMemo(() => getTodayEntry(), [entries, getTodayEntry])
+  const insights = useMemo(() => getInsights(), [entries, profile, getInsights])
   const caloriesRemaining = Math.max(0, profile.calorieGoal - Number(entry.calories || 0))
   const proteinRemaining = Math.max(0, profile.proteinGoal - Number(entry.protein || 0))
   const stepsRemaining = Math.max(0, profile.stepGoal - Number(entry.steps || 0))

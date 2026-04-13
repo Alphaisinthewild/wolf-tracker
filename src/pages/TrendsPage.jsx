@@ -26,7 +26,10 @@ function TrendCard({ title, children }) {
 
 export default function TrendsPage() {
   const [range, setRange] = useState(7)
-  const trendRows = useTrackerStore(s => s.getTrendData(range))
+  const entries = useTrackerStore(s => s.entries)
+  const getTrendData = useTrackerStore(s => s.getTrendData)
+
+  const trendRows = useMemo(() => getTrendData(range), [entries, range, getTrendData])
 
   const data = useMemo(() => trendRows.map(item => ({
     ...item,
