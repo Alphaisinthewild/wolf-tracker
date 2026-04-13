@@ -39,6 +39,20 @@ const emptyEntry = (date) => ({
   updatedAt: new Date().toISOString(),
 })
 
+const normalizeEntry = (entry) => {
+  const date = entry?.date || getTodayKey()
+
+  return {
+    ...emptyEntry(date),
+    ...(entry || {}),
+    measurements: {
+      ...emptyEntry(date).measurements,
+      ...(entry?.measurements || {}),
+    },
+    photos: Array.isArray(entry?.photos) ? entry.photos : [],
+  }
+}
+
 const useTrackerStore = create((set, get) => ({
   profile: defaultProfile,
   entries: {},
@@ -55,10 +69,13 @@ const useTrackerStore = create((set, get) => ({
         getAllEntries(),
       ])
 
-      let entries = Object.fromEntries(allEntries.map(entry => [entry.date, entry]))
+      let entries = Object.fromEntries(allEntries.map(entry => {
+        const normalized = normalizeEntry(entry)
+        return [normalized.date, normalized]
+      }))
 
       if (allEntries.length === 0) {
-        const seedEntries = buildSeedEntries()
+        const seedEntries = buildSeedEntries().map(normalizeEntry)
         await Promise.all(seedEntries.map(saveEntry))
         entries = Object.fromEntries(seedEntries.map(entry => [entry.date, entry]))
       }
@@ -119,10 +136,11 @@ const useTrackerStore = create((set, get) => ({
 
     const stored = await getEntry(date)
     if (stored) {
+      const normalized = normalizeEntry(stored)
       set(state => ({
-        entries: { ...state.entries, [date]: stored },
+        entries: { ...state.entries, [date]: normalized },
       }))
-      return stored
+      return normalized
     }
 
     return emptyEntry(date)
@@ -130,7 +148,7 @@ const useTrackerStore = create((set, get) => ({
 
   saveDailyEntry: async (entry) => {
     const normalized = {
-      ...entry,
+      ...normalizeEntry(entry),
       updatedAt: new Date().toISOString(),
     }
 
@@ -148,7 +166,7 @@ const useTrackerStore = create((set, get) => ({
   },
 
   clearAllData: async () => {
-    const seedEntries = buildSeedEntries()
+    const seedEntries = buildSeedEntries().map(normalizeEntry)
     set({ status: 'Saving...' })
     await clearEntries()
     await Promise.all(seedEntries.map(saveEntry))
@@ -163,15 +181,7 @@ const useTrackerStore = create((set, get) => ({
   importBackup: async (payload) => {
     const nextProfile = payload?.profile || defaultProfile
     const nextEntries = Array.isArray(payload?.entries)
-      ? payload.entries.map(entry => ({
-          ...emptyEntry(entry.date),
-          ...entry,
-          measurements: {
-            ...emptyEntry(entry.date).measurements,
-            ...(entry.measurements || {}),
-          },
-          photos: Array.isArray(entry.photos) ? entry.photos : [],
-        }))
+      ? payload.entries.map(normalizeEntry)
       : []
 
     set({ status: 'Saving...' })
