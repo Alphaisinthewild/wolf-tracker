@@ -1,12 +1,20 @@
-import { Capacitor } from '@capacitor/core'
-import { LocalNotifications } from '@capacitor/local-notifications'
-
 const STORAGE_KEY = 'wolf-tracker-last-notification-date'
 const REMINDER_NOTIFICATION_ID = 1001
 
+async function getNativeNotifications() {
+  const [{ Capacitor }, { LocalNotifications }] = await Promise.all([
+    import('@capacitor/core'),
+    import('@capacitor/local-notifications'),
+  ])
+
+  if (!Capacitor.isNativePlatform()) return null
+  return LocalNotifications
+}
+
 export async function requestNotificationPermission() {
-  if (Capacitor.isNativePlatform()) {
-    const permissions = await LocalNotifications.requestPermissions()
+  const nativeNotifications = await getNativeNotifications()
+  if (nativeNotifications) {
+    const permissions = await nativeNotifications.requestPermissions()
     return permissions.display
   }
 
@@ -17,8 +25,9 @@ export async function requestNotificationPermission() {
 }
 
 export async function getNotificationPermission() {
-  if (Capacitor.isNativePlatform()) {
-    const permissions = await LocalNotifications.checkPermissions()
+  const nativeNotifications = await getNativeNotifications()
+  if (nativeNotifications) {
+    const permissions = await nativeNotifications.checkPermissions()
     return permissions.display
   }
 
@@ -27,15 +36,18 @@ export async function getNotificationPermission() {
 }
 
 async function scheduleNativeReminder(profile) {
+  const nativeNotifications = await getNativeNotifications()
+  if (!nativeNotifications) return null
+
   if (!profile?.remindersEnabled) {
-    await LocalNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] })
+    await nativeNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] })
     return () => {}
   }
 
   const [hours, minutes] = String(profile.reminderTime || '20:00').split(':').map(Number)
 
-  await LocalNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] })
-  await LocalNotifications.schedule({
+  await nativeNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] })
+  await nativeNotifications.schedule({
     notifications: [
       {
         id: REMINDER_NOTIFICATION_ID,
@@ -68,7 +80,7 @@ function scheduleBrowserReminder(profile) {
     if (!alreadySent && now.getHours() === hours && now.getMinutes() === minutes) {
       new Notification('Wolf Tracker check-in', {
         body: 'Log today’s health data and keep your streak alive.',
-        icon: '/favicon.svg',
+        icon: 'favicon.svg',
       })
       localStorage.setItem(STORAGE_KEY, today)
     }
@@ -80,14 +92,24 @@ function scheduleBrowserReminder(profile) {
 }
 
 export function scheduleDailyReminder(profile) {
-  if (Capacitor.isNativePlatform()) {
-    let active = true
-    scheduleNativeReminder(profile)
-    return () => {
-      if (!active) return
-      active = false
-    }
-  }
+  let cleanup = null
+  let active = true
 
-  return scheduleBrowserReminder(profile)
+  ;(async () => {
+    const nativeCleanup = await scheduleNativeReminder(profile)
+    if (!active) {
+      if (typeof nativeCleanup === 'function') nativeCleanup()
+      return
+    }
+
+    cleanup = nativeCleanup || scheduleBrowserReminder(profile)
+  })().catch(() => {
+    if (!active) return
+    cleanup = scheduleBrowserReminder(profile)
+  })
+
+  return () => {
+    active = false
+    if (typeof cleanup === 'function') cleanup()
+  }
 }
