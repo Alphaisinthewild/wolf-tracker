@@ -68,6 +68,16 @@ export default function SettingsPage() {
   const handleEnableNotifications = async () => {
     const result = await requestNotificationPermission()
     setNotificationState(result)
+
+    if (result === 'granted') {
+      const nextProfile = {
+        ...form,
+        remindersEnabled: true,
+        notificationsConfigured: true,
+      }
+      setForm(nextProfile)
+      await saveProfile(nextProfile)
+    }
   }
 
   return (

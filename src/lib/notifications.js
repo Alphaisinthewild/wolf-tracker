@@ -36,6 +36,8 @@ export async function getNotificationPermission() {
 }
 
 async function scheduleNativeReminder(profile) {
+  if (!profile?.notificationsConfigured) return null
+
   const nativeNotifications = await getNativeNotifications()
   if (!nativeNotifications) return null
 
@@ -92,6 +94,8 @@ function scheduleBrowserReminder(profile) {
 }
 
 export function scheduleDailyReminder(profile) {
+  if (!profile?.notificationsConfigured) return () => {}
+
   let cleanup = null
   let active = true
 

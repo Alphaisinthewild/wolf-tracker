@@ -12,7 +12,8 @@ const defaultProfile = {
   proteinGoal: 185,
   stepGoal: 10000,
   unitSystem: 'imperial',
-  remindersEnabled: true,
+  remindersEnabled: false,
+  notificationsConfigured: false,
   reminderTime: '20:00',
   setupComplete: false,
 }

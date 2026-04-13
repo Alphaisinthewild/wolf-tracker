@@ -24,7 +24,7 @@ export default function App() {
   }, [initialize])
 
   useEffect(() => {
-    if (!initialized || !hasCompletedSetup) return undefined
+    if (!initialized || !hasCompletedSetup || !profile?.notificationsConfigured) return undefined
     return scheduleDailyReminder(profile)
   }, [initialized, hasCompletedSetup, profile])
 
