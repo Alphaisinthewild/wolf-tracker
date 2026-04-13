@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wolf-tracker-v1'
+const CACHE_NAME = 'wolf-tracker-v2'
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '')
 const APP_SHELL = [`${BASE}/`, `${BASE}/index.html`, `${BASE}/manifest.webmanifest`, `${BASE}/favicon.svg`]
 
