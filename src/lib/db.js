@@ -23,6 +23,24 @@ function getFallbackEntries() {
   }
 }
 
+function getFallbackProfile() {
+  const storage = getStorage()
+  if (!storage) return null
+
+  try {
+    const raw = storage.getItem(PROFILE_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function setFallbackProfile(profile) {
+  const storage = getStorage()
+  if (!storage) return
+  storage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
+}
+
 function setFallbackEntries(entries) {
   const storage = getStorage()
   if (!storage) return
@@ -51,60 +69,68 @@ async function withDb(run, fallback) {
 
 export async function getProfile() {
   return withDb(
-    db => db.get('kv', PROFILE_KEY),
-    () => {
-      const storage = getStorage()
-      if (!storage) return null
-      const raw = storage.getItem(PROFILE_STORAGE_KEY)
-      return raw ? JSON.parse(raw) : null
+    async (db) => {
+      const profile = await db.get('kv', PROFILE_KEY)
+      return profile || getFallbackProfile()
     },
+    () => getFallbackProfile(),
   )
 }
 
 export async function saveProfile(profile) {
+  setFallbackProfile(profile)
+
   return withDb(
-    db => db.put('kv', profile, PROFILE_KEY),
-    () => {
-      const storage = getStorage()
-      if (!storage) return null
-      storage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
+    async (db) => {
+      await db.put('kv', profile, PROFILE_KEY)
       return profile
     },
+    () => profile,
   )
 }
 
 export async function getEntry(date) {
   return withDb(
-    db => db.get('entries', date),
+    async (db) => {
+      const entry = await db.get('entries', date)
+      return entry || getFallbackEntries().find(item => item.date === date) || null
+    },
     () => getFallbackEntries().find(entry => entry.date === date) || null,
   )
 }
 
 export async function saveEntry(entry) {
+  const entries = getFallbackEntries().filter(item => item.date !== entry.date)
+  entries.push(entry)
+  setFallbackEntries(entries)
+
   return withDb(
-    db => db.put('entries', entry),
-    () => {
-      const entries = getFallbackEntries().filter(item => item.date !== entry.date)
-      entries.push(entry)
-      setFallbackEntries(entries)
+    async (db) => {
+      await db.put('entries', entry)
       return entry
     },
+    () => entry,
   )
 }
 
 export async function getAllEntries() {
   return withDb(
-    db => db.getAll('entries'),
+    async (db) => {
+      const entries = await db.getAll('entries')
+      return entries.length ? entries : getFallbackEntries()
+    },
     () => getFallbackEntries(),
   )
 }
 
 export async function clearEntries() {
+  setFallbackEntries([])
+
   return withDb(
-    db => db.clear('entries'),
-    () => {
-      setFallbackEntries([])
+    async (db) => {
+      await db.clear('entries')
       return null
     },
+    () => null,
   )
 }
